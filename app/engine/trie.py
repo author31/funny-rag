@@ -1,4 +1,4 @@
-from utils import ilen
+from .utils import ilen
 from typing import List, Dict
 
 class TrieNode:
@@ -19,7 +19,7 @@ class TrieNode:
 class Trie:
     def __init__(self, topk: int = 3) -> None:
         self.root_node = TrieNode()
-        self.topk: int = topk
+        self.topk = topk
         
     def char_to_idx(self, char: str) -> int:
         return ord(char) - ord("a")
