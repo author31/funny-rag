@@ -1,6 +1,6 @@
 from .builder import TrieBuilder
 from config.settings import HN_URL
-from redis_client import redis_client
+from app.redis_client import redis_client
 from contextlib import asynccontextmanager
 
 @asynccontextmanager

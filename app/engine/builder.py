@@ -5,7 +5,15 @@ from .utils import flatten_ls
 from app.engine.connection import init_db, get_posts
 from app.engine.fetcher import fetch_top_stories
 
-class TrieBuilder:
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls in cls._instances: return cls._instances[cls]
+        instance = super().__call__(*args, **kwargs)
+        cls._instances[cls] = instance
+        return cls._instances[cls]
+
+class TrieBuilder(metaclass=Singleton):
     def __init__(self, url: str, redis_client: Any = None) -> None:
         self.url = url
         self.redis_client = redis_client
@@ -23,6 +31,12 @@ class TrieBuilder:
         
     def _set_cache(self) -> None:
         if not self.redis_client: return
+        is_set_cache = len(self.redis_client.keys())==0
+
+        if not is_set_cache: 
+            print("skipping caching setting")
+            return
+
         for node in self.trie_tree.root_node.children:
             for topk in node.cache_topk:
                 self.redis_client.rpush(node.char, topk["word"])

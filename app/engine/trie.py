@@ -40,6 +40,7 @@ class Trie:
 
             if idx == len(word)-1:
                 temp_node.children[char_idx].is_end_of_word = True
+                return
 
             temp_node = temp_node.children[char_idx]
             
@@ -48,6 +49,18 @@ class Trie:
         for node in self.root_node.children: 
             if not node: continue
             self._cache_topk(node)
+            
+    def search(self, word: str) -> TrieNode:
+        temp_node = self.root_node
+        for idx in range(len(word)):
+            char_idx = self.char_to_idx(word[idx])
+
+            if not temp_node.children[char_idx]: return "wordNotFound"
+
+            if idx == len(word)-1: return temp_node.children[char_idx]
+            
+            temp_node = temp_node.children[char_idx]
+
 
     def get_topk(self, topk: int = None) -> List[Dict]:
         if not topk: topk = self.topk
