@@ -3,3 +3,5 @@ trie
 exps.py
 dump.rdb
 .env
+dump.rdb
+posts.db
