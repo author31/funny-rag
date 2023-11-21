@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from openai import OpenAI
 from psycopg2 import pool
 from typing import List, Dict
 from dotenv import load_dotenv
@@ -22,7 +21,6 @@ class SQLEngine:
             user= user,
             password= password
         )
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.rate_limit_enabled = True
 
     @contextmanager

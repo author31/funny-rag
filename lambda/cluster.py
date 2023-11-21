@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+from tqdm import tqdm
 from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -9,10 +10,9 @@ from sklearn.cluster import KMeans
 
 load_dotenv()
 
+
 class Cluster:
     def __init__(self) -> None:
-        self.client= OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.model_name= "gpt-3.5-turbo-1106"
         self.sql_engine= SQLEngine(
             host= os.getenv("POSTGRESQL_URL"),
             database= "postgres",
@@ -34,15 +34,6 @@ class Cluster:
         results = self.sql_engine.execute_select_query(query)
         return [self._tuple_to_dict(result) for result in results]
     
-    def _call_api(self, prompt: str) -> str:
-        response = self.client.chat.completions.create(
-            model= self.model_name,
-            messages = [
-                {"role": "system", "content": "You are an assistant"},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return response.choices[0].message.content
     
     def create_cluster_table(self) -> None:
         query = \
@@ -79,6 +70,9 @@ class Cluster:
         """
         INSERT INTO hn_cluster_titles(hn_cluster_idx, title)
         VALUES (%s, %s)
+        ON CONFLICT (hn_cluster_idx)
+        DO 
+            UPDATE SET title = EXCLUDED.title
         """
         self.sql_engine.execute_insert_query(query, (data[0], data[1]))
 
@@ -106,14 +100,15 @@ class Cluster:
         results = self.sql_engine.execute_select_query(query)
         return [result[0] for result in results]
 
-    def get_records_by_cluster_idx(self, cluster_idx: int) -> List[dict]:
+    def get_records_by_cluster_idx(self, cluster_idx: int, limit: int= 5) -> List[dict]:
         query = \
         """
         SELECT * FROM hn_embeddings
         INNER JOIN hn_clusters ON hn_embeddings.id = hn_clusters.hn_embedding_id
         WHERE hn_clusters.cluster_idx = %s
+        LIMIT %s
         """
-        results = self.sql_engine.execute_select_query(query, (cluster_idx,))
+        results = self.sql_engine.execute_select_query(query, (cluster_idx, limit))
         return [self._tuple_to_dict(result) for result in results]
 
     def execute_cluster(self) -> None:
@@ -135,22 +130,9 @@ class Cluster:
         self.create_cluster_title_table()
         self.execute_cluster()
 
-    def post_processing(self) -> None:
-        unique_cluster_idxes = self.get_unqiue_cluster_idx()
-        for cluster_idx in unique_cluster_idxes:
-            clustered_result = self.get_records_by_cluster_idx(cluster_idx)
-            generated_title = self.generate_title(clustered_result)
-            self.insert_to_cluster_title_table([cluster_idx, generated_title])
+    def _call_api(self) -> str:
+        raise NotImplementedError("_call_api method is not implemented")
 
-        
-    def extract_keywords(self, clustered_data: List) -> None:
-        prompt = "I have read the following texts:\n\n"
-        prompt += "\n\n".join(f"Text {i+1}: {text}" for i, text in enumerate(clustered_data))
-        prompt += "\n\nBased on these texts, what is an interesting and thought-provoking question that arises from the key themes or ideas presented?"
-        return self._call_api(prompt)
-    
-    def generate_title(self, clustered_data: List) -> None:
-        keywords = self.extract_keywords(clustered_data)
-        prompt = "Using the following list of keywords, create a compelling and coherent title. The title should integrate these keywords in a way that forms a clear and engaging topic or theme."
-        prompt += "keywords: " + keywords
-        return self._call_api(prompt)
+    def process(self) -> None:
+        raise NotImplementedError("process method is not implemented")
+
