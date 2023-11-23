@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+import os
+from app import sql_engine
+from config.settings import HN_URL
 from app.redis_client import redis_client
 from app.engine.builder import TrieBuilder
-from config.settings import HN_URL
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, HTTPException, Request
 
 router = APIRouter()
 
@@ -11,7 +13,23 @@ template = Jinja2Templates(directory="views")
 
 @router.get("/", response_class=HTMLResponse)
 def get_homepage(request: Request):
-    return template.TemplateResponse("homepage.html", {"request": request})
+    engine = sql_engine.SQLEngine(
+        host= os.getenv("POSTGRESQL_URL"),
+        database= "postgres",
+        user= "postgres",
+        password= os.getenv("POSTGRESQL_PWD"),
+        minconn= 1,
+        maxconn= 5
+    )
+    query = \
+    """
+    SELECT * FROM hn_cluster_titles
+    ORDER BY hn_cluster_idx ASC
+    """
+    
+    results = engine.execute_select_query(query)
+    cluster_data = {r[0]:r[1] for r in results}
+    return template.TemplateResponse("homepage.html", {"request": request, "cluster_data": cluster_data})
 
 @router.get("/suggestion/")
 def get_suggestion(prefix: str):

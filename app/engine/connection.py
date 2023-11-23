@@ -15,7 +15,7 @@ def init_db():
         """
     )
     connection.commit()
-    print("connected")
+    print("sqlite3: connected")
 
 def insert_post(title: str, url: str):
     cursor.execute(

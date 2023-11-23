@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../shared_utils")
+
 import os
 import json
 import pandas as pd

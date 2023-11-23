@@ -1,8 +1,10 @@
+import sys
+sys.path.append("../shared_utils")
+
 import os
 import json
 import time
 import requests
-import psycopg2
 from tqdm import tqdm
 from openai import OpenAI
 from psycopg2 import pool
@@ -10,7 +12,7 @@ from datetime import datetime
 from typing import List, Dict
 from dotenv import load_dotenv
 from contextlib import contextmanager
-from sql_engine import SQLEngine
+from shared_utils.sql_engine import SQLEngine
 
 load_dotenv()
 
