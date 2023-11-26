@@ -2,3 +2,7 @@
     transform: scale(1.05);
     transition: transform .2s;
 }
+
+button {
+    width: 80%;
+}

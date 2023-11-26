@@ -18,9 +18,7 @@ class Singleton(type):
         return cls._instances[cls]
 
 class TrieBuilder(metaclass=Singleton):
-    def __init__(self, url: str, redis_client: Any = None) -> None:
-        self.url = url
-        self.redis_client = redis_client
+    def __init__(self) -> None:
         self.trie_tree = Trie()
         self.sql_engine = sql_engine.SQLEngine(
             host= os.getenv("POSTGRESQL_URL"),
@@ -31,28 +29,9 @@ class TrieBuilder(metaclass=Singleton):
             maxconn= 5
         )
     
-    def clean_symbols(self, word: str) -> str:
-        return re.sub(r'[^a-z]', "", word.lower())
-
     def init_builder(self) -> None:
-        self._fetch_data()
         self._build_trie()
-        self._set_cache()
         
-        
-    def _set_cache(self) -> None:
-        if not self.redis_client: return
-        is_set_cache = len(self.redis_client.keys())==0
-
-        if not is_set_cache: 
-            print("skipping caching setting")
-            return
-
-        for node in self.trie_tree.root_node.children:
-            if not node: continue
-            for topk in node.cache_topk:
-                self.redis_client.rpush(node.char, topk["word"])
-
     def _santitize_word(self, word: str) -> str:
         word = word.replace("-", " ")
         word = re.sub(r"[^a-z\s]", "", word.lower())
@@ -62,11 +41,7 @@ class TrieBuilder(metaclass=Singleton):
     def _build_trie(self) -> None:
         titles = self._get_cluster_titles()
         titles = [self._santitize_word(t) for t in titles]
-        self.trie_tree.build_sentence_trie(vocabs=titles)
-        self.trie_tree.init_cache()
-        
-    def _fetch_data(self):
-        fetch_top_stories(url=self.url, topk=300)
+        self.trie_tree.build_tree(sentences=titles)
         
     def _tuple_to_dict(self, tuple_data, keys=None) -> dict:
         return dict(zip(keys, tuple_data))

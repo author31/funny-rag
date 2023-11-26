@@ -5,6 +5,6 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app):
-    trie_builder = TrieBuilder(url=HN_URL, redis_client=redis_client)
+    trie_builder = TrieBuilder()
     trie_builder.init_builder()
     yield
