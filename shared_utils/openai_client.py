@@ -1,9 +1,8 @@
 import os
-import together
 from tqdm import tqdm
 from typing import List
 from openai import OpenAI
-from cluster import Cluster
+from .cluster import Cluster
 from dotenv import load_dotenv
 
 load_dotenv()

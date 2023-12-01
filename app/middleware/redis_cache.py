@@ -17,22 +17,13 @@ async def cache_middleware(request: Request, call_next):
     response = await call_next(request)
     redis_client.set(cache_key, json.dumps(response))
 
-def db_cache_wrapper(query: str):
+def db_cache_wrapper(engine: sql_engine.SQLEngine, query: str, select_data: tuple=None):
     _hash = hashlib.md5(query.encode("utf-8")).hexdigest()
     cache_key = f"cache-{_hash}"
     cached_response = redis_client.get(cache_key)
     
     if cached_response is not None: return json.loads(cached_response)
 
-    engine = sql_engine.SQLEngine(
-        host= os.getenv("POSTGRESQL_URL"),
-        database= "postgres",
-        user= "postgres",
-        password= os.getenv("POSTGRESQL_PWD"),
-        minconn= 1,
-        maxconn= 5
-    )
-    
-    response = engine.execute_select_query(query)
+    response = engine.execute_select_query(query, select_data=select_data)
     redis_client.set(cache_key, json.dumps(response), ex=30)
     return response

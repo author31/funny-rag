@@ -6,3 +6,7 @@
 button {
     width: 80%;
 }
+
+.hidden {
+    display: none;
+}

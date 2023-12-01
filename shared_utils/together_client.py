@@ -3,7 +3,7 @@ import re
 import together
 from tqdm import tqdm
 from typing import List
-from cluster import Cluster
+from .cluster import Cluster
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,7 +15,7 @@ class TogetherClient(Cluster):
         self.model_name = "mistralai/Mistral-7B-Instruct-v0.1"
         self.max_tokens = 512
         self.temperature = 0.7
-        self.top_p = 5
+        self.top_p = 0.7
         self.top_k = 70
         
     @property
@@ -41,6 +41,15 @@ class TogetherClient(Cluster):
         Output: A single, concise question. 
         </s>[INST]
         """
+        
+    @property
+    def retrieve_prompt_template(self):
+        return \
+        """
+        <s>[INST] Read through the provided texts, which are the titles from the website named Hacker News: {texts}
+        to answer the following question: {question}
+        Consider the depth of analysis, context, and relavance to the topic when evaluating the response</s>[INST]
+        """
 
     def process(self) -> None:
         self.pre_processing()
@@ -53,6 +62,11 @@ class TogetherClient(Cluster):
             santitized_title = self._santitize_word(generated_title)
             self.insert_to_cluster_title_table([cluster_idx, santitized_title])
 
+    def retrieve_answer(self, question: str, titles: List):
+        assert titles, "Contexts have to be provided"
+        prompt = self.retrieve_prompt_template.format(question=question, texts=titles)
+        return self._call_api(prompt=prompt)
+        
     def apply_template(self, clusterd_data: List[str], prompt_template: str = None):
         prompt_template = prompt_template
         texts = "\n".join(f"Text {i+1}: {text}" for i, text in enumerate(clusterd_data))

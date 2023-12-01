@@ -12,34 +12,57 @@
                 <div class="col col-lg-12">
                     <h1>Funny RAG</h1>
                        <input id="searchBox" class="form-control" type="search" 
-                           name="prefix" placeholder="Begin Typing To Search Users..." >
+                           name="prefix" placeholder="Type in the questions or select from the below" >
                 </div>
             </div>
         </div>
-        
-        <div class="container">
-            <div class="row">
-                {% for key, value in cluster_data.items() %}
-                <div class="col py-2 my-2">
-                    <div class="card text-bg-light h-70" style="width: 12rem;">
-                        <div class="card-body">
-                            <h5 class="card-title">Trend #{{ key+1 }}</h5>
-                            <p class="card-text">{{ value }}</p>
-                            <div class="text-center">
-                                <button type="button" class="btn btn-primary">View</button>
+        <div class="clusterSection"> 
+            
+            <div class="container">
+                <div class="row">
+                    {% for key, value in cluster_data.items() %}
+                    <div class="col py-2 my-2">
+                        <div class="card text-bg-light h-70" style="width: 12rem;">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <h5 class="card-title">Trend #{{ key+1 }}</h5>
+                                    <p class="card-text">{{ value }}</p>
+                                    <button type="button" class="selectQuestion">
+                                        View
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+        </div>
+        <div class="answer">
+            
         </div>
 
     </body>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $()
+        $(document).ready(function(event) {
+            $(".selectQuestion").click(function() {
+                let cluster_idx_text = $(this).closest('.card-body').find('.card-title').text()
+                let cluster_question = $(this).closest('.card-body').find('.card-text').text()
+                cluster_idx_text = cluster_idx_text.replace("Trend #", "")
+                $.ajax({
+                    type: "POST",
+                    url: "/app/retrieve",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
+                        hn_cluster_idx: parseInt(cluster_idx_text),
+                        question: cluster_question
+                    }),
+                    success: function(data) {
+                        window.location.href = `/app/answer?answer=${data}`
+                    }
+                })
+            })
         })
     </script>
 </html>

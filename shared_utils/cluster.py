@@ -1,6 +1,3 @@
-import sys
-sys.path.append("../shared_utils")
-
 import os
 import json
 import pandas as pd
@@ -8,11 +5,10 @@ from tqdm import tqdm
 from typing import List
 from openai import OpenAI
 from dotenv import load_dotenv
-from sql_engine import SQLEngine
+from .sql_engine import SQLEngine
 from sklearn.cluster import KMeans
 
 load_dotenv()
-
 
 class Cluster:
     def __init__(self) -> None:
