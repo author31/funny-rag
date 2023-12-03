@@ -10,3 +10,27 @@ button {
 .hidden {
     display: none;
 }
+
+.loader {
+    display: flex;
+    justify-content: space-between;
+    width: 8%;
+    height: 50px;
+}
+
+.loader div {
+    width: 4px;
+    height: 100%;
+    background: #ccc;
+    animation: load 1s ease-in-out infinite;
+}
+
+
+@keyframes load {
+    0%, 70% {
+        transform: scaleY(0.4);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}

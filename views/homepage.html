@@ -1,68 +1,83 @@
-<html>
-    <head>
-        <title>Funny RAG</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-        <link rel="stylesheet" href='/static/css/stylesheet.css' type="text/css">
-    </head>
-    
-    <body>
-        <div class="container text-center">
-            <div class="row justify-content-center">
-                <div class="col col-lg-12">
-                    <h1>Funny RAG</h1>
-                       <input id="searchBox" class="form-control" type="search" 
-                           name="prefix" placeholder="Type in the questions or select from the below" >
-                </div>
-            </div>
-        </div>
-        <div class="clusterSection"> 
-            
-            <div class="container">
-                <div class="row">
-                    {% for key, value in cluster_data.items() %}
-                    <div class="col py-2 my-2">
-                        <div class="card text-bg-light h-70" style="width: 12rem;">
-                            <div class="card-body">
-                                <div class="text-center">
-                                    <h5 class="card-title">Trend #{{ key+1 }}</h5>
-                                    <p class="card-text">{{ value }}</p>
-                                    <button type="button" class="selectQuestion">
-                                        View
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+{% extends "base.html" %}
+{% block content %}
+<div class="container clusterSection">
+    <div class="row">
+        {% for key, value in cluster_data.items() %}
+        <div class="col py-2 my-2">
+            <div class="card text-bg-light h-70" style="width: 12rem;">
+                <div class="card-body">
+                    <div class="text-center">
+                        <h5 class="card-title">Trend #{{ key+1 }}</h5>
+                        <p class="card-text">{{ value }}</p>
+                        <button type="button" class="selectQuestion">
+                            Get an answer
+                        </button>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
         </div>
-        <div class="answer">
-            
-        </div>
+        {% endfor %}
+    </div>
+</div>
+<div class="container">
+    <div class="loaderSection loader mx-auto my-4" style="display: none;">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
 
-    </body>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function(event) {
-            $(".selectQuestion").click(function() {
-                let cluster_idx_text = $(this).closest('.card-body').find('.card-title').text()
-                let cluster_question = $(this).closest('.card-body').find('.card-text').text()
-                cluster_idx_text = cluster_idx_text.replace("Trend #", "")
-                $.ajax({
-                    type: "POST",
-                    url: "/app/retrieve",
-                    contentType: "application/json; charset=utf-8",
-                    data: JSON.stringify({
-                        hn_cluster_idx: parseInt(cluster_idx_text),
-                        question: cluster_question
-                    }),
-                    success: function(data) {
-                        window.location.href = `/app/answer?answer=${data}`
-                    }
-                })
+</div>
+
+<div class="answerSection my-4"></div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function(event) {
+        $(".selectQuestion").click(function() {
+            $(".clusterSection").css("display", "none");
+            $(".loaderSection").css("display", "flex");
+
+            let cluster_idx_text = $(this).closest('.card-body').find('.card-title').text()
+            let cluster_question = $(this).closest('.card-body').find('.card-text').text()
+            cluster_idx_text = cluster_idx_text.replace("Trend #", "")
+            $.ajax({
+                type: "POST",
+                url: "/app/retrieve",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({
+                    hn_cluster_idx: parseInt(cluster_idx_text),
+                    question: cluster_question
+                }),
+                success: function(data) {
+                    $(".answerSection").html(data);
+                    $(".loaderSection").css("display", "none");
+                }
             })
+        });
+        let timeout =null;
+        $(".searchBox").on("input", function(e) {
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                if (e.target.value !== "") {
+                    $.ajax({
+                        type: "GET",
+                        url: "/app/suggestion",
+                        data: {
+                            prefix: e.target.value
+                        },
+                        success: function(data) {
+                            $(".suggestionSection").css("display", "contents")
+                            $(".suggestionSection").html(data)
+                            console.log("---- succeeded ----")
+                        }
+                    })
+                    
+                }
+            }, 1000)
         })
-    </script>
-</html>
+
+    })
+</script>
+{% endblock %}

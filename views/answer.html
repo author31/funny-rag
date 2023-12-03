@@ -1,10 +1,21 @@
-{% extends "base.html" %}
-{% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col">
-                Answer: {{answer}}
-            </div>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <p><b>Question:</b> {{question}} </p>
+            <p><b>Answer:</b> {{answer}}</p>
         </div>
     </div>
-{% endblock %}
+    <div class="row">
+        <div><b>Sources: </b></div>
+        {% for title, url in sources.items() %}
+            <div>
+                <a class="link-offset-2" href="{{url}}">{{title}}</a>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="my-4 text-center">
+        <button type="button" class="btn btn-primary w-25">
+            <a href="/app" class="text-light">Back</a>
+        </button>
+    </div>
+</div>

@@ -40,20 +40,28 @@ def get_homepage(request: Request):
 def get_homepage(request: Request, answer: str):
     return template.TemplateResponse("answer.html", {"request": request, "answer": answer})
 
-@router.get("/suggestion/")
-def get_suggestion(prefix: str):
-    result = redis_client.lrange(prefix, 0, -1)
-    if len(result) > 0: return result
+@router.get("/suggestion/", response_class=HTMLResponse)
+def get_suggestion(request: Request, prefix: str):
     trie_builder = TrieBuilder()
-    correspond_node = trie_builder.trie_tree.search(word= prefix)
-    if isinstance(correspond_node, str) and correspond_node == "wordNotFound": return []
-    freq_list = trie_builder.trie_tree.get_node_topk(correspond_node)
-    return [f["word"] for f in freq_list]
+    suggestions = trie_builder.trie_tree.search(queries=prefix)
+    return template.TemplateResponse(
+        "suggestions.html", {
+            "request": request,
+            "suggestions": suggestions
+        }
+    )
 
-@router.post("/retrieve")
-def retrieve_answer(cluster_data: ClusterModel):
+@router.post("/retrieve", response_class=HTMLResponse)
+def retrieve_answer(request: Request, cluster_data: ClusterModel):
     client = together_client.TogetherClient()
-    # results = client.get_records_by_cluster_idx(cluster_idx=cluster_data.hn_cluster_idx)
-    # titles = [r["title"] for r in results]
-    # return client.retrieve_answer(question=cluster_data.question, titles=titles)
-    return "hi"
+    results = client.get_records_by_cluster_idx(cluster_idx=cluster_data.hn_cluster_idx)
+    sources = {r["title"]:f"https://news.ycombinator.com/item?id={r['hn_post_id']}" for r in results}
+    answer = client.retrieve_answer(question=cluster_data.question, titles=list(sources.keys()))
+    return template.TemplateResponse(
+        "answer.html", {
+            "request": request,
+            "answer": answer,
+            "question": cluster_data.question,
+            "sources": sources,
+        }
+    )
