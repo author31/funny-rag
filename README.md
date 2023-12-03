@@ -11,8 +11,18 @@ This project is only for educational purpose, it aims to teach myself about the 
 - **RAG System**: Leverages the concept of Retrieval-Augmented Generation for enhancing information retrieval and response generation (In progress).
 - **LLM Integration**: Uses a Large Language Model to analyze data, identify trends, and generate relevant questions. [Looking options for utilizing open-source LLMs with faster inference methods (tvm, llama.cpp, wasm)].
 - **LLM Used**: 
--- Mistral-7B API provided by [together.ai](https://www.together.ai/)
+-- Mistral-7B API provided by [together.ai](https://www.together.ai/) \
 -- GPT-3.5 powered by [OpenAI](https://openai.com/)
+
+## Installation
+Clone: \
+`https://github.com/author31/funny-rag.git`
+
+Install packages \
+`pip install -r requirements.txt`
+
+Run: \
+`uvicorn main:app --port 8000 --host 0.0.0.0 --reload`
 
 ## TODO
 - Crawl the corresponding post linked urls to: 
