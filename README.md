@@ -1,7 +1,10 @@
 # Funny RAG
 
+![Screenshot](https://funny-rag-screenshots.s3.eu-north-1.amazonaws.com/funny-rag.png)
+
 ## Overview
 This project is only for educational purpose, it aims to teach myself about the fundemental workflow of RAG (Retrieval-Augmented Generation). The app is powered by FastAPI with Jinja2 template engine. Besides that, for autocomplete system, the trie data structured is also utilized (using submodule named `trie`).
+
 
 ## Features
 - **Autocomplete Functionality**: Utilizes a trie data structure for efficient autocomplete suggestions based on LLM generated questions.
