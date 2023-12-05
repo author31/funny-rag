@@ -1,10 +1,37 @@
+body {
+ background: linear-gradient(to right, #7B9ACC, #8563A5) !important;
+ color: #ffffff; 
+}
+
 .card:hover {
     transform: scale(1.05);
     transition: transform .2s;
 }
 
+.card-custom {
+    background-color: #A084CA;
+    color: #ffffff; /* Text color for the button, chosen for readability */
+    border: none; /* No border for a modern look */
+    border-radius: 20px; /* Rounded corners for the button */
+    padding: 10px 20px; /* Vertical and horizontal padding for the button */
+    cursor: pointer; /* Changes the cursor to indicate the button is clickable */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
 button {
     width: 80%;
+}
+
+
+.button-custom {
+    background-color: #F4A460; /* Vibrant orange color */
+    border: none;
+    border-radius: 20px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.button-custom:hover {
+    background-color: #9372B2; /* Darker shade of orange for the hover effect */
 }
 
 .hidden {
